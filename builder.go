@@ -194,11 +194,7 @@ func assignSlices(app *cobra.Command, slices map[string]reflect.Value) error {
 			return err
 		}
 		if s != nil {
-			// TODO: weird BUG?
-			if len(s) > 1 {
-				s = s[:len(s)/2]
-			}
-			v.Set(reflect.ValueOf(s))
+			v.Set(reflect.ValueOf(s[:]))
 		}
 	}
 	return nil
