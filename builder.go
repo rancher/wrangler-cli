@@ -82,6 +82,7 @@ func Main(cmd *cobra.Command) {
 func Command(obj Runnable, cmd cobra.Command) *cobra.Command {
 	var (
 		envs     []func()
+		arrays   = map[string]reflect.Value{}
 		slices   = map[string]reflect.Value{}
 		maps     = map[string]reflect.Value{}
 		ptrValue = reflect.ValueOf(obj)
@@ -116,8 +117,14 @@ func Command(obj Runnable, cmd cobra.Command) *cobra.Command {
 		case reflect.String:
 			flags.StringVarP((*string)(unsafe.Pointer(v.Addr().Pointer())), name, alias, defValue, usage)
 		case reflect.Slice:
-			slices[name] = v
-			flags.StringSliceP(name, alias, nil, usage)
+			switch fieldType.Tag.Get("slice") {
+			case "array":
+				arrays[name] = v
+				flags.StringArrayP(name, alias, nil, usage)
+			default:
+				slices[name] = v
+				flags.StringSliceP(name, alias, nil, usage)
+			}
 		case reflect.Map:
 			maps[name] = v
 			flags.StringSliceP(name, alias, nil, usage)
@@ -151,9 +158,9 @@ func Command(obj Runnable, cmd cobra.Command) *cobra.Command {
 	}
 
 	c.RunE = obj.Run
-	c.PersistentPreRunE = bind(c.PersistentPreRunE, slices, maps, envs)
-	c.PreRunE = bind(c.PreRunE, slices, maps, envs)
-	c.RunE = bind(c.RunE, slices, maps, envs)
+	c.PersistentPreRunE = bind(c.PersistentPreRunE, arrays, slices, maps, envs)
+	c.PreRunE = bind(c.PreRunE, arrays, slices, maps, envs)
+	c.RunE = bind(c.RunE, arrays, slices, maps, envs)
 
 	cust, ok := obj.(customizer)
 	if ok {
@@ -200,6 +207,20 @@ func assignSlices(app *cobra.Command, slices map[string]reflect.Value) error {
 	return nil
 }
 
+func assignArrays(app *cobra.Command, arrays map[string]reflect.Value) error {
+	for k, v := range arrays {
+		k = contextKey(k)
+		s, err := app.Flags().GetStringArray(k)
+		if err != nil {
+			return err
+		}
+		if s != nil {
+			v.Set(reflect.ValueOf(s[:]))
+		}
+	}
+	return nil
+}
+
 func contextKey(name string) string {
 	parts := strings.Split(name, ",")
 	return parts[len(parts)-1]
@@ -224,6 +245,7 @@ func name(name, setName, short string) (string, string) {
 }
 
 func bind(next func(*cobra.Command, []string) error,
+	arrays map[string]reflect.Value,
 	slices map[string]reflect.Value,
 	maps map[string]reflect.Value,
 	envs []func()) func(*cobra.Command, []string) error {
@@ -233,6 +255,9 @@ func bind(next func(*cobra.Command, []string) error,
 	return func(cmd *cobra.Command, args []string) error {
 		for _, envCallback := range envs {
 			envCallback()
+		}
+		if err := assignArrays(cmd, arrays); err != nil {
+			return err
 		}
 		if err := assignSlices(cmd, slices); err != nil {
 			return err
