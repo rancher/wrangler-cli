@@ -117,8 +117,8 @@ func Command(obj Runnable, cmd cobra.Command) *cobra.Command {
 		case reflect.String:
 			flags.StringVarP((*string)(unsafe.Pointer(v.Addr().Pointer())), name, alias, defValue, usage)
 		case reflect.Slice:
-			switch fieldType.Tag.Get("slice") {
-			case "array":
+			switch fieldType.Tag.Get("split") {
+			case "false":
 				arrays[name] = v
 				flags.StringArrayP(name, alias, nil, usage)
 			default:
