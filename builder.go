@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"context"
 	"os"
 	"reflect"
 	"regexp"
@@ -69,7 +68,7 @@ func Name(obj interface{}) string {
 }
 
 func Main(cmd *cobra.Command) {
-	ctx := signals.SetupSignalHandler(context.Background())
+	ctx := signals.SetupSignalContext()
 	if err := cmd.ExecuteContext(ctx); err != nil {
 		logrus.Fatal(err)
 	}
