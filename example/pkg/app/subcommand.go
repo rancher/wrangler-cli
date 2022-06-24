@@ -2,14 +2,15 @@ package app
 
 import (
 	"fmt"
-	"github.com/rancher/wrangler-cli"
+
+	cli "github.com/rancher/wrangler-cli"
 	"github.com/spf13/cobra"
 )
 
 func NewSubCommand() *cobra.Command {
 	return cli.Command(&SubCommand{}, cobra.Command{
 		Short: "Add some short description",
-		Long: "Add some long description",
+		Long:  "Add some long description",
 	})
 }
 
