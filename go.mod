@@ -8,7 +8,7 @@ require (
 	github.com/docker/go-units v0.4.0
 	github.com/rancher/wrangler v0.8.8
 	github.com/sirupsen/logrus v1.6.0
-	github.com/spf13/cobra v1.0.0
+	github.com/spf13/cobra v1.5.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.18.8
 	k8s.io/apimachinery v0.24.2
