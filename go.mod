@@ -10,8 +10,8 @@ require (
 	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/cobra v1.0.0
 	gopkg.in/yaml.v2 v2.4.0
-	k8s.io/api v0.18.8
-	k8s.io/apimachinery v0.24.2
+	k8s.io/api v0.24.3
+	k8s.io/apimachinery v0.24.3
 	k8s.io/klog v1.0.0
 	sigs.k8s.io/yaml v1.2.0
 )
